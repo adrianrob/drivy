@@ -212,11 +212,23 @@ function getprice(discount) // EXO 1 : discount == false,   EXO 2 : discount == 
     }
 
     rentals[i].price = jours * timeprice + dist * distprice;
-    console.log("rentalID : "+ rentals[i].id + "  price : " +rentals[i].price);
+  }
+}
+
+function getCom() // Exercice 3          commission:30%
+{
+  for(var i = 0;i< rentals.length;i++) // foreach rental get the price
+  {
+    rentals[i].commission.insurance = 0.15 * rentals[i].price;
+    rentals[i].commission.assistance = Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000)) +1;
+    rentals[i].commission.drivy = rentals[i].commission.insurance - rentals[i].commission.assistance;
   }
 }
 
 getprice(true); // exo1:false exo2:true
+getCom();
+
+
 
 console.log(cars);
 console.log(rentals);

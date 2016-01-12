@@ -165,7 +165,7 @@ var rentalModifications = [{
   'pickupDate': '2015-12-05'
 }];
 
-function getindfromid(idcar)
+function getindfromid(idcar)  // get car index from carId
 {
   for(var i = 0;i<cars.length;i++)
   {
@@ -175,40 +175,48 @@ function getindfromid(idcar)
   return -1;
 }
 
-function getprice()
+function getprice(discount) // EXO 1 : discount == false,   EXO 2 : discount == true
 {
-  var jours = 0;
-  var timeprice = 0;
-  for(var i = 0;i< rentals.length;i++)
-  {
-    jours = Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000));
-    timeprice = cars[getindfromid(rentals[i].carId)].pricePerDay;
+  var jours = 0;     // nbr de jours de location ( eg. Paul Bismuth a loué une voiture pour la journée)
+  var timeprice = 0; // prix à la journée
+  var dist = 0;      // distance parcourue lors de la location
+  var distprice = 0; // prix au km
 
-    if(jours >10)
+  for(var i = 0;i< rentals.length;i++) // foreach rental get the price
+  {
+    jours = Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000)) +1;
+    timeprice = cars[getindfromid(rentals[i].carId)].pricePerDay;
+    dist = rentals[i].distance;
+    distprice = cars[getindfromid(rentals[i].carId)].pricePerKm;
+
+    if(discount)  // Exercice 2
     {
-        timeprice = 0.5 *timeprice;
-    }
-    else
-    {
-      if(jours > 4)
+      if(jours >10)
       {
-        timeprice = 0.7 * timeprice ;
+          timeprice = 0.5 *timeprice;
       }
-      else {
-        if(jours >1)
+      else
+      {
+        if(jours > 4)
         {
-          timeprice = 0.9 * timeprice;
+          timeprice = 0.7 * timeprice ;
+        }
+        else
+        {
+          if(jours >1)
+          {
+            timeprice = 0.9 * timeprice;
+          }
         }
       }
     }
 
-    rentals[i].price = jours * timeprice;
-    rentals[i].price += rentals[i].distance * cars[getindfromid(rentals[i].carId)].pricePerKm;
-    console.log("prix " +rentals[i].price);
+    rentals[i].price = jours * timeprice + dist * distprice;
+    console.log("rentalID : "+ rentals[i].id + "  price : " +rentals[i].price);
   }
 }
 
-getprice();
+getprice(false); // exo1:false exo2:true
 
 console.log(cars);
 console.log(rentals);

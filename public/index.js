@@ -175,6 +175,16 @@ function getindfromid(idcar)  // get car index from carId
   return -1;
 }
 
+function getindfromrentalid(rentalid)
+{
+  for(var i = 0;i<rentals.length;i++)
+  {
+    if(rentals[i].id == rentalid)
+       return i;
+  }
+  return -1;
+}
+
 function getprice(discount) // EXO 1 : discount == false,   EXO 2 : discount == true
 {
   var jours = 0;     // nbr de jours de location ( eg. Paul Bismuth a loué une voiture pour la journée)
@@ -232,10 +242,32 @@ function getCom() // Exercice 3          commission:30%
   }
 }
 
+function payActors()
+{
+  var option = 0;
+  for(var i = 0;i<actors.length;i++)
+  {
+    if(rentals[getindfromrentalid(actors[i].rentalId)].options.deductibleReduction)
+      option = 4 * (Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000)) +1);
+    else
+      option = 0;
+
+    // driver
+    actors[i].payment[0].amount = rentals[getindfromrentalid(actors[i].rentalId)].price;
+    // owner
+    actors[i].payment[1].amount = 0.7 * (rentals[getindfromrentalid(actors[i].rentalId)].price - option);
+    // insurance
+    actors[i].payment[2].amount = rentals[getindfromrentalid(actors[i].rentalId)].commission.insurance;
+    // assistance
+    actors[i].payment[3].amount = rentals[getindfromrentalid(actors[i].rentalId)].commission.assistance;
+    // drivy
+    actors[i].payment[4].amount =  rentals[getindfromrentalid(actors[i].rentalId)].commission.drivy + option;
+  }
+}
 
 getprice(true); // exo1:false exo2:true
 getCom();
-
+payActors();
 
 
 console.log(cars);

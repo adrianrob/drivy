@@ -181,6 +181,7 @@ function getprice(discount) // EXO 1 : discount == false,   EXO 2 : discount == 
   var timeprice = 0; // prix à la journée
   var dist = 0;      // distance parcourue lors de la location
   var distprice = 0; // prix au km
+  var option = 0;    // deductible option
 
   for(var i = 0;i< rentals.length;i++) // foreach rental get the price
   {
@@ -188,6 +189,8 @@ function getprice(discount) // EXO 1 : discount == false,   EXO 2 : discount == 
     timeprice = cars[getindfromid(rentals[i].carId)].pricePerDay;
     dist = rentals[i].distance;
     distprice = cars[getindfromid(rentals[i].carId)].pricePerKm;
+    if(rentals[i].options.deductibleReduction) option = 4 * jours;
+    else option = 0;
 
     if(discount)  // Exercice 2
     {
@@ -211,19 +214,24 @@ function getprice(discount) // EXO 1 : discount == false,   EXO 2 : discount == 
       }
     }
 
-    rentals[i].price = jours * timeprice + dist * distprice;
+    rentals[i].price = jours * timeprice + dist * distprice + option;
   }
 }
 
 function getCom() // Exercice 3          commission:30%
 {
+  var total = 0;
   for(var i = 0;i< rentals.length;i++) // foreach rental get the price
   {
-    rentals[i].commission.insurance = 0.15 * rentals[i].price;
+    total = rentals[i].price;
+    if(rentals[i].options.deductibleReduction)
+      total = total-4;
+    rentals[i].commission.insurance = 0.15 * total;
     rentals[i].commission.assistance = Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000)) +1;
     rentals[i].commission.drivy = rentals[i].commission.insurance - rentals[i].commission.assistance;
   }
 }
+
 
 getprice(true); // exo1:false exo2:true
 getCom();

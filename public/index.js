@@ -36,7 +36,7 @@ var rentals = [{
     'deductibleReduction': false
   },
   'price': 0,
-  'commission': {
+    'commission': {
     'insurance': 0,
     'assistance': 0,
     'drivy': 0
@@ -164,6 +164,28 @@ var rentalModifications = [{
   'rentalId': '3-sa-92',
   'pickupDate': '2015-12-05'
 }];
+
+function getindfromid(idcar)
+{
+  for(var i = 0;i<cars.length;i++)
+  {
+    if(cars[i].id == idcar)
+       return i;
+  }
+  return -1;
+}
+
+function getprice()
+{
+  for(var i = 0;i< rentals.length;i++)
+  {
+    rentals[i].price = Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000)) * cars[getindfromid(rentals[i].carId)].pricePerDay;
+    rentals[i].price += rentals[i].distance * cars[getindfromid(rentals[i].carId)].pricePerKm;
+    console.log("prix " +rentals[i].price);
+  }
+}
+
+getprice();
 
 console.log(cars);
 console.log(rentals);

@@ -177,9 +177,32 @@ function getindfromid(idcar)
 
 function getprice()
 {
+  var jours = 0;
+  var timeprice = 0;
   for(var i = 0;i< rentals.length;i++)
   {
-    rentals[i].price = Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000)) * cars[getindfromid(rentals[i].carId)].pricePerDay;
+    jours = Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000));
+    timeprice = cars[getindfromid(rentals[i].carId)].pricePerDay;
+
+    if(jours >10)
+    {
+        timeprice = 0.5 *timeprice;
+    }
+    else
+    {
+      if(jours > 4)
+      {
+        timeprice = 0.7 * timeprice ;
+      }
+      else {
+        if(jours >1)
+        {
+          timeprice = 0.9 * timeprice;
+        }
+      }
+    }
+
+    rentals[i].price = jours * timeprice;
     rentals[i].price += rentals[i].distance * cars[getindfromid(rentals[i].carId)].pricePerKm;
     console.log("prix " +rentals[i].price);
   }

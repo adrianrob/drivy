@@ -216,7 +216,7 @@ function getprice(discount) // EXO 1 : discount == false,   EXO 2 : discount == 
   }
 }
 
-getprice(false); // exo1:false exo2:true
+getprice(true); // exo1:false exo2:true
 
 console.log(cars);
 console.log(rentals);

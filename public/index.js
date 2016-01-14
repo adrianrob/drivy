@@ -175,11 +175,21 @@ function getindfromid(idcar)  // get car index from carId
   return -1;
 }
 
-function getindfromrentalid(rentalid)
+function getindfromrentalid(rentalid) // get rental index from rentalid
 {
   for(var i = 0;i<rentals.length;i++)
   {
     if(rentals[i].id == rentalid)
+       return i;
+  }
+  return -1;
+}
+
+function getactorfromrentalId(id)
+{
+  for(var i = 0;i<actors.length;i++)
+  {
+    if(actors[i].rentalId == id)
        return i;
   }
   return -1;
@@ -235,7 +245,7 @@ function getCom() // Exercice 3          commission:30%
   {
     total = rentals[i].price;
     if(rentals[i].options.deductibleReduction)
-      total = total-4;
+      total = total-(4*(Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000)) +1));
     rentals[i].commission.insurance = 0.15 * total;
     rentals[i].commission.assistance = Math.abs(( new Date(rentals[i].returnDate) - new Date(rentals[i].pickupDate))/(24*60*60*1000)) +1;
     rentals[i].commission.drivy = rentals[i].commission.insurance - rentals[i].commission.assistance;
@@ -265,10 +275,111 @@ function payActors()
   }
 }
 
+function rentalModif()
+{
+  /*
+  1 Get all changes, 2 recalculate costs for everyone, 3 get delta for each actors ,  4 print new money tranfert.
+   */
+
+  // 1 Get all changes
+  var rentalindex = 0;
+  var pDate = '2016-01-01';
+  var rDate = '2016-01-04';
+  var jours = 0;     // nbr de jours de location ( eg. Paul Bismuth a loué une voiture pour la journée)
+  var timeprice = 0; // prix à la journée
+  var dist = 0;      // distance parcourue lors de la location
+  var distprice = 0; // prix au km
+  var option = 0;    // deductible option
+  var pay = [];
+  var deltas = [];
+  var total = 0;
+
+  for(var i =0; i<rentalModifications.length;i++)
+  {
+    rentalindex = getindfromrentalid(rentalModifications[i].rentalId);
+    pDate = rentals[rentalindex].pickupDate;
+    rDate = rentals[rentalindex].returnDate;
+    dist = rentals[rentalindex].distance;
+
+    for(var property in rentalModifications[i])
+    {
+      switch(property)
+      {
+        case "distance":
+        dist = rentalModifications[i].distance;
+        break;
+        case "pickupDate":
+        pDate = rentalModifications[i].pickupDate;
+        break;
+        case "returnDate":
+        rDate = rentalModifications[i].returnDate;
+        break;
+        case "rentalId":
+        break;
+        default:
+        console.log("switch problem : " + property);
+        break;
+      }
+    }
+
+// 2 recalculate costs for everyone
+
+jours = Math.abs(( new Date(pDate) - new Date(rDate))/(24*60*60*1000)) +1;
+timeprice = cars[getindfromid(rentals[rentalindex].carId)].pricePerDay;
+distprice = cars[getindfromid(rentals[rentalindex].carId)].pricePerKm;
+if(rentals[i].options.deductibleReduction) option = 4 * jours;
+else option = 0;
+
+  if(jours >10)
+  {
+      timeprice = 0.5 *timeprice;
+  }
+  else
+  {
+    if(jours > 4)
+    {
+      timeprice = 0.7 * timeprice ;
+    }
+    else
+    {
+      if(jours >1)
+      {
+        timeprice = 0.9 * timeprice;
+      }
+    }
+  }
+
+  pay[0] = jours * timeprice + dist * distprice + option;
+  total = pay[0];
+  if(rentals[rentalindex].options.deductibleReduction)
+    total = total-(4*jours);
+  pay[1] = 0.7 * total; // owner
+  pay[2] = 0.15 * total; // insurance
+  pay[3] = jours; // assistance
+  pay[4] = pay[2] - pay[3];
+  if(rentals[rentalindex].options.deductibleReduction)
+    pay[4] = pay[4] + 4*(jours);
+
+  // 3 Get the deltas
+
+for(var j = 0; j<5;j++)
+  deltas[j] = pay[j] - actors[getactorfromrentalId(rentalModifications[i].rentalId)].payment[j].amount;
+
+  // print results
+
+console.log("deltas for rental : "+rentalModifications[i].rentalId);
+for(var j = 0; j<5;j++)
+{
+  console.log(actors[0].payment[j].who + " : " +deltas[j] + " euros.");
+}
+  }
+}
+
+
 getprice(true); // exo1:false exo2:true
 getCom();
 payActors();
-
+rentalModif();
 
 console.log(cars);
 console.log(rentals);
